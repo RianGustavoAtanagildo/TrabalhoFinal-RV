@@ -109,8 +109,8 @@ namespace CircuitAIR.Tests
             CircuitLevel level = CircuitLevels.Get(levelIndex);
             WirePath path = WirePath.FromControlPoints(level.Points, level.CornerRadius, 0.002f);
             float[] control = path.ControlPointDistances;
-            float start = control[1] + 0.035f;
-            float finish = control[control.Length - 2] - 0.01f;
+            float start = CircuitWire.StartGuideFor(control);
+            float finish = CircuitWire.FinishFor(control);
             float tube = Mathf.Max(0.0015f, level.RingRadius * 0.064f);
 
             Assert.That(finish, Is.GreaterThan(start + 0.1f), "O circuito é curto demais.");
@@ -132,26 +132,47 @@ namespace CircuitAIR.Tests
 
         /// <summary>
         /// Lupa física: o aro tem o tamanho real (não o da fase). Garante que as três fases podem ser
-        /// completadas com aros reais de 3 a 7 cm de diâmetro e arame de 1,5 mm de raio.
+        /// completadas com aros de arame de 3 a 7 cm de diâmetro e com o aro da equipe
+        /// (10 cm por fora, parede de 2 mm, faixa de 1,5 cm de largura).
         /// </summary>
         [Test]
-        public void EveryLevel_WorksWithPhysicalLupaSizes([Values(0, 1, 2)] int levelIndex, [Values(0.015f, 0.025f, 0.035f)] float ringRadius)
+        public void EveryLevel_WorksWithPhysicalLupaSizes(
+            [Values(0, 1, 2)] int levelIndex,
+            [Values(0.015f, 0.025f, 0.035f, LupaController.DefaultPhysicalRadius)] float ringRadius)
         {
+            bool teamRing = Mathf.Approximately(ringRadius, LupaController.DefaultPhysicalRadius);
+            float halfDepth = teamRing ? LupaController.DefaultPhysicalHalfDepth : 0f;
+            float tube = teamRing ? LupaController.DefaultPhysicalTubeRadius : 0.0015f;
+
             CircuitLevel level = CircuitLevels.Get(levelIndex);
             WirePath path = WirePath.FromControlPoints(level.Points, level.CornerRadius, 0.002f);
             float[] control = path.ControlPointDistances;
-            float start = control[1] + 0.035f;
-            float finish = control[control.Length - 2] - 0.01f;
-            const float tube = 0.0015f;
+            float start = CircuitWire.StartGuideFor(control);
+            float finish = CircuitWire.FinishFor(control);
 
             float worst = float.MaxValue;
             for (float d = start; d <= finish; d += 0.002f)
             {
-                RingQuery query = WireRingMath.Query(path, path.PointAt(d), path.TangentAt(d), ringRadius, d);
+                RingQuery query = WireRingMath.Query(path, path.PointAt(d), path.TangentAt(d), ringRadius, d, halfDepth);
                 Assert.IsTrue(query.Threaded, $"Fase {levelIndex + 1}, aro {ringRadius * 200f:0.0} cm: fio fora da argola em {d:0.000} m.");
                 worst = Mathf.Min(worst, query.MinDistance - (level.WireRadius + tube));
             }
             Assert.That(worst, Is.GreaterThan(0.003f), $"Fase {levelIndex + 1}, aro {ringRadius * 200f:0.0} cm: folga mínima {worst * 1000f:0.0} mm.");
+        }
+
+        [Test]
+        public void BandRing_TouchesAlongItsWholeWidth()
+        {
+            const float radius = 0.049f;
+            const float halfDepth = 0.0075f;
+            // Ponto na parede, 5 mm para o lado ao longo do eixo: ainda está na faixa (distância 0).
+            Assert.That(WireRingMath.DistanceToRing(new Vector3(radius, 0f, 0.005f), Vector3.zero, Vector3.forward, radius, halfDepth), Is.EqualTo(0f).Within(1e-6f));
+            // 2 cm para o lado: fora da faixa, conta só o que passa da borda (12,5 mm).
+            Assert.That(WireRingMath.DistanceToRing(new Vector3(radius, 0f, 0.02f), Vector3.zero, Vector3.forward, radius, halfDepth), Is.EqualTo(0.0125f).Within(1e-6f));
+            // Fio inclinado que encosta na borda da faixa, mas não no meio dela, conta como toque.
+            WirePath slanted = WirePath.FromControlPoints(new[] { new Vector3(0f, 0f, -0.2f), new Vector3(0.0465f * 2f, 0f, 0.2f) }, 0.02f, 0.001f);
+            RingQuery query = WireRingMath.Query(slanted, new Vector3(0f, 0f, -0.007f), Vector3.forward, radius, 0f, halfDepth);
+            Assert.IsTrue(WireRingMath.IsTouching(query, 0.003f, 0.001f));
         }
 
         [Test]

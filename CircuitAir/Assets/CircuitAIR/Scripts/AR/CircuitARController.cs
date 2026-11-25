@@ -8,7 +8,8 @@ namespace CircuitAIR
     /// <summary>
     /// Rastreamento de imagens com AR Foundation:
     /// - "CircuitQR": posiciona o circuito virtual sobre o QR Code impresso.
-    /// - "LupaMarker" (opcional): marcador colado na lupa física, usado no modo "Lupa física".
+    /// - "LupaMarker" e "LupaMarkerVerso": frente e verso da bandeirinha presa no topo do aro da lupa física.
+    ///   Qualquer um dos dois lados que a câmera enxergar serve.
     ///
     /// Para o circuito ficar estável (requisito não funcional g), ele segue o QR Code com suavização
     /// enquanto o jogador ainda não começou, e fica travado numa âncora AR durante a partida.
@@ -20,10 +21,21 @@ namespace CircuitAIR
         [SerializeField] private ARTrackedImageManager trackedImageManager;
         [Tooltip("Opcional. Com ele, o circuito fica preso a uma âncora AR durante a partida.")]
         [SerializeField] private ARAnchorManager anchorManager;
+        [Tooltip("Câmera AR. Se vazio, é procurada na cena.")]
+        [SerializeField] private ARCameraManager cameraManager;
+        [Tooltip("Usa a configuração de câmera de maior resolução: o ARCore acha marcadores pequenos (como o da lupa) de mais longe.")]
+        [SerializeField] private bool preferHighResolutionCamera = true;
 
         [Header("Nomes das imagens na biblioteca (maiúsculas importam)")]
         [SerializeField] private string circuitImageName = "CircuitQR";
         [SerializeField] private string lupaImageName = "LupaMarker";
+        [SerializeField] private string lupaBackImageName = "LupaMarkerVerso";
+
+        /// <summary>
+        /// O verso da bandeirinha, visto de trás, tem a direita e a normal invertidas em relação à frente
+        /// (mesmo topo): é a frente girada 180° em torno do eixo vertical da imagem (Z).
+        /// </summary>
+        public static readonly Quaternion BackToFront = Quaternion.Euler(0f, 0f, 180f);
 
         [Header("Circuito")]
         [SerializeField] private CircuitTheme theme;
@@ -41,6 +53,9 @@ namespace CircuitAIR
         private bool locked;
         private ARAnchor anchor;
         private int anchorRequest;
+        private bool lupaFrontTracked;
+        private bool lupaBackTracked;
+        private bool cameraConfigured;
 
         /// <summary>Disparado na primeira vez que o QR Code é encontrado.</summary>
         public event Action CircuitPlaced;
@@ -48,7 +63,10 @@ namespace CircuitAIR
         public bool HasCircuit => hasCircuitPose && circuit != null;
         public CircuitWire Circuit => circuit;
         public TrackingState CircuitTrackingState { get; private set; } = TrackingState.None;
-        public bool LupaMarkerTracked { get; private set; }
+        public bool LupaMarkerTracked => lupaFrontTracked || lupaBackTracked;
+
+        /// <summary>Configuração de câmera escolhida (texto para diagnóstico), ou vazio.</summary>
+        public string CameraConfigurationInfo { get; private set; } = "";
 
         private void Awake()
         {
@@ -56,6 +74,8 @@ namespace CircuitAIR
                 trackedImageManager = GetComponent<ARTrackedImageManager>();
             if (anchorManager == null)
                 anchorManager = GetComponent<ARAnchorManager>();
+            if (cameraManager == null)
+                cameraManager = FindFirstObjectByType<ARCameraManager>();
 
             circuitRoot = new GameObject("Circuito (AR)").transform;
             circuitRoot.gameObject.SetActive(false);
@@ -158,7 +178,9 @@ namespace CircuitAIR
                 if (image.referenceImage.name == circuitImageName)
                     CircuitTrackingState = TrackingState.None;
                 else if (image.referenceImage.name == lupaImageName)
-                    LupaMarkerTracked = false;
+                    lupaFrontTracked = false;
+                else if (image.referenceImage.name == lupaBackImageName)
+                    lupaBackTracked = false;
             }
         }
 
@@ -187,14 +209,80 @@ namespace CircuitAIR
             }
             else if (imageName == lupaImageName)
             {
-                LupaMarkerTracked = tracking;
+                lupaFrontTracked = tracking;
                 if (lupa != null)
                     lupa.SetMarkerPose(pose, tracking);
+            }
+            else if (imageName == lupaBackImageName)
+            {
+                lupaBackTracked = tracking;
+                // Converte a pose do verso na pose equivalente da frente (mesmo lugar, virada 180°).
+                if (lupa != null)
+                    lupa.SetMarkerPose(new Pose(pose.position, pose.rotation * BackToFront), tracking);
+            }
+        }
+
+        /// <summary>
+        /// Pede ao ARCore/ARKit a imagem de câmera de maior resolução (com pelo menos 30 quadros/s) e foco
+        /// automático. Com a configuração padrão (640x480 no ARCore), um marcador de 6 cm a meio metro
+        /// ocupa poucos pixels e quase não é encontrado.
+        /// </summary>
+        private void ConfigureCamera()
+        {
+            // No Editor (XR Simulation) as "configurações" seguem o tamanho da janela Game; travar uma delas
+            // deixaria a câmera simulada com outro formato. Só vale no celular.
+            if (cameraConfigured || !preferHighResolutionCamera || cameraManager == null || Application.isEditor)
+                return;
+            var subsystem = cameraManager.subsystem;
+            if (subsystem == null || !subsystem.running)
+                return;
+            cameraConfigured = true;
+
+            cameraManager.autoFocusRequested = true;
+            if (cameraManager.descriptor == null || !cameraManager.descriptor.supportsCameraConfigurations)
+                return;
+
+            try
+            {
+                using (var configurations = cameraManager.GetConfigurations(Unity.Collections.Allocator.Temp))
+                {
+                    if (!configurations.IsCreated || configurations.Length == 0)
+                        return;
+
+                    XRCameraConfiguration best = configurations[0];
+                    long bestPixels = -1;
+                    foreach (XRCameraConfiguration configuration in configurations)
+                    {
+                        int fps = configuration.framerate ?? 30;
+                        if (fps < 30)
+                            continue;
+                        long pixels = (long)configuration.width * configuration.height;
+                        if (pixels > bestPixels)
+                        {
+                            best = configuration;
+                            bestPixels = pixels;
+                        }
+                    }
+                    if (bestPixels < 0)
+                        return;
+
+                    XRCameraConfiguration? current = cameraManager.currentConfiguration;
+                    if (!current.HasValue || current.Value != best)
+                        cameraManager.currentConfiguration = best;
+                    CameraConfigurationInfo = $"{best.width}x{best.height}";
+                    Debug.Log($"CircuitAIR: câmera em {best.width}x{best.height} ({best.framerate} fps) para achar o marcador da lupa.");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning("CircuitAIR: não foi possível mudar a configuração da câmera: " + exception.Message);
             }
         }
 
         private void Update()
         {
+            ConfigureCamera();
+
             if (!hasCircuitPose || locked)
                 return;
 

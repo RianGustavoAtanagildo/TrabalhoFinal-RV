@@ -31,19 +31,31 @@ namespace CircuitAIR
         /// <summary>Distância de um ponto até a circunferência (centro c, normal n, raio R).</summary>
         public static float DistanceToCircle(Vector3 point, Vector3 center, Vector3 normal, float radius)
         {
+            return DistanceToRing(point, center, normal, radius, 0f);
+        }
+
+        /// <summary>
+        /// Distância de um ponto até um aro em forma de faixa (um tubo curto): a parede fica no raio R e
+        /// vai de -<paramref name="halfDepth"/> a +<paramref name="halfDepth"/> ao longo do eixo do aro.
+        /// Com halfDepth = 0 é a distância até a circunferência.
+        /// </summary>
+        public static float DistanceToRing(Vector3 point, Vector3 center, Vector3 normal, float radius, float halfDepth)
+        {
             Vector3 d = point - center;
             float height = Vector3.Dot(d, normal);
             Vector3 radial = d - height * normal;
             float radialDistance = radial.magnitude - radius;
-            return Mathf.Sqrt(height * height + radialDistance * radialDistance);
+            float axialDistance = Mathf.Max(0f, Mathf.Abs(height) - Mathf.Max(0f, halfDepth));
+            return Mathf.Sqrt(axialDistance * axialDistance + radialDistance * radialDistance);
         }
 
         /// <summary>
         /// Consulta a argola contra o fio. Todos os vetores devem estar no mesmo espaço do <paramref name="path"/>.
         /// <paramref name="progressHint"/> escolhe, se o fio cruzar a argola mais de uma vez,
-        /// o cruzamento mais perto do progresso atual do jogador.
+        /// o cruzamento mais perto do progresso atual do jogador. <paramref name="halfDepth"/> é a meia largura
+        /// da faixa do aro (aro real); 0 para uma argola fina.
         /// </summary>
-        public static RingQuery Query(WirePath path, Vector3 center, Vector3 normal, float radius, float progressHint)
+        public static RingQuery Query(WirePath path, Vector3 center, Vector3 normal, float radius, float progressHint, float halfDepth = 0f)
         {
             normal = normal.sqrMagnitude > 1e-12f ? normal.normalized : Vector3.forward;
             Vector3[] points = path.Points;
@@ -63,7 +75,7 @@ namespace CircuitAIR
 
             for (int i = 0; i < points.Length; i++)
             {
-                float distance = DistanceToCircle(points[i], center, normal, radius);
+                float distance = DistanceToRing(points[i], center, normal, radius, halfDepth);
                 if (distance < result.MinDistance)
                 {
                     result.MinDistance = distance;

@@ -31,7 +31,7 @@
   .esquema svg { flex: 0 0 92mm; height: auto; }
   .quebra { break-before: page; }
   code { font-family: Consolas, monospace; font-size: 8.5pt; background: #f2f2f2; padding: 0 0.6mm; }
-  .marcadores { display: flex; gap: 10mm; align-items: flex-start; margin-top: 3mm; }
+  .marcadores { display: flex; flex-direction: column; gap: 5mm; align-items: center; margin-top: 3mm; }
   .corte { display: inline-block; border: 0.25mm dashed #888; padding: 3mm; }
 </style>
 </head>
@@ -56,9 +56,9 @@
   <h2>Informe o contexto (interdisciplinaridade) no qual será utilizado:</h2>
   <p>O aplicativo será utilizado no contexto de <b>desenvolvimento de jogos, programação, realidade aumentada,
   visão computacional e interação humano-computador</b>. Ele recria o jogo do fio: o jogador conduz uma lupa
-  (um aro com cabo) ao longo de um fio sem encostar nele. O fio é virtual: a câmera do celular reconhece um
+  (um aro de 10 cm) ao longo de um fio sem encostar nele. O fio é virtual: a câmera do celular reconhece um
   <b>QR Code</b> impresso sobre a mesa e desenha o circuito em 3D em cima dele. A <b>lupa é física</b> e é reconhecida
-  pela câmera por meio de um marcador impresso preso no seu cabo, unindo um objeto real (a lupa) a um objeto virtual
+  pela câmera por meio de uma bandeirinha impressa (frente e verso) presa em pé no topo do aro, unindo um objeto real (a lupa) a um objeto virtual
   (o circuito). O projeto combina programação em C#, computação gráfica (malhas geradas por código), geometria
   (detecção de contato entre o aro e o fio) e rastreamento de imagens em RA.</p>
 </div>
@@ -78,13 +78,13 @@
   a) O aplicativo deverá ser desenvolvido utilizando <b>Unity 6.3 LTS (6000.3.24f1)</b> com Universal Render Pipeline e <b>linguagem C#</b>.<br>
   b) Deverá utilizar <b>AR Foundation 6.3</b> (ARCore XR Plugin 6.3 no Android e ARKit XR Plugin 6.3 no iOS) para os recursos de realidade aumentada, sem misturar outras bibliotecas de RA. Os testes no computador usam o <b>XR Simulation</b> do próprio AR Foundation.<span class="mudou">detalhado</span><br>
   c) O aplicativo deverá funcionar em <b>smartphones Android 7.1 ou superior compatíveis com ARCore</b> (ARM64, OpenGL ES 3) e em <b>iPhones compatíveis com ARKit</b>. O app Android é distribuído como APK (pacote <code>com.equipe4.circuitair</code>); o iOS é gerado num Mac com Xcode.<br>
-  d) O dispositivo deverá possuir <b>câmera traseira</b>. Recomenda-se deixar o celular num <b>suporte ou tripé</b> a 40 a 60 cm da mesa, apontado para o QR Code, para o jogador ter as mãos livres.<span class="novo">novo</span><br>
-  e) Materiais: <b>QR Code impresso com 10 cm</b>, <b>marcador da lupa impresso com 5 cm</b> preso em pé no cabo da lupa, e uma lupa com aro de 3 a 7 cm de diâmetro. As duas imagens tiveram nota 100 (de 100) na ferramenta de avaliação de imagens do ARCore.<span class="novo">novo</span><br>
+  d) O dispositivo deverá possuir <b>câmera traseira</b>. Recomenda-se deixar o celular num <b>suporte ou tripé</b> a 50–60 cm do QR Code, com o circuito inteiro na tela, para o jogador ter as mãos livres. No celular o app pede a imagem de câmera de maior resolução, para achar a bandeirinha de mais longe.<span class="novo">novo</span><br>
+  e) Materiais: <b>QR Code impresso com 10 cm</b>, <b>bandeirinha da lupa impressa com 6 cm</b> (frente e verso com desenhos diferentes) presa em pé e atravessada no topo do aro, e a lupa da equipe: aro de 10 cm de diâmetro, faixa de 1,5 cm e parede de 2 mm. As três imagens tiveram nota 100 (de 100) na ferramenta de avaliação de imagens do ARCore.<span class="novo">novo</span><br>
   f) O aplicativo deverá apresentar uma interface <b>simples e intuitiva</b>: em português, na vertical, com botões grandes e uma mensagem que diz o que fazer em cada momento.<br>
   g) O circuito deverá permanecer <b>estável sobre o QR Code</b>: antes da partida ele acompanha o QR Code com suavização; durante a partida fica preso a uma <b>âncora AR</b> e não some nem se mexe se o QR Code for coberto.<br>
   h) O aplicativo deverá apresentar um <b>funcionamento fluido</b>: a detecção de contato é feita por geometria (sem simulação física), leve o bastante para rodar a cada quadro.<br>
   i) A contagem deverá ser <b>justa</b>: a posição da lupa é verificada em passos de no máximo 3 mm entre os quadros (um movimento rápido não "atravessa" o fio sem contar), saltos acima de uma velocidade de mão humana não contam como avanço, e perder a lupa de vista por um instante não gera erro.<span class="novo">novo</span><br>
-  j) O projeto deverá utilizar <b>Git/GitHub para controle de versão</b> e ter <b>testes automatizados</b> (21 testes do Unity Test Framework, incluindo a garantia de que as três fases podem ser completadas sem encostar).<span class="mudou">ampliado</span>
+  j) O projeto deverá utilizar <b>Git/GitHub para controle de versão</b> e ter <b>testes automatizados</b> (25 testes do Unity Test Framework, incluindo a garantia de que as três fases podem ser completadas sem encostar).<span class="mudou">ampliado</span>
 </div>
 
 <div class="secao longa">
@@ -92,7 +92,7 @@
   1 <b>O usuário</b> deverá apontar a câmera do celular para o QR Code para que o aplicativo reconheça o marcador.<br>
   2 <b>O usuário</b> poderá pressionar o botão <b>"Iniciar"</b> para começar o desafio.<br>
   3 <b>O aplicativo</b> deverá posicionar o circuito virtual em realidade aumentada sobre o QR Code identificado e <b>mantê-lo ancorado</b> mesmo com o QR Code coberto.<span class="mudou">ajustado</span><br>
-  4 <b>O aplicativo</b> deverá <b>reconhecer a lupa física</b> pelo marcador preso no cabo e desenhar um contorno sobre o aro real.<span class="novo">novo</span><br>
+  4 <b>O aplicativo</b> deverá <b>reconhecer a lupa física</b> pela bandeirinha presa no topo do aro (qualquer um dos dois lados) e desenhar um contorno sobre o aro real.<span class="novo">novo</span><br>
   5 <b>O usuário</b> deverá percorrer o circuito utilizando a lupa: encaixar o aro no fio dentro do <b>anel verde</b> (o tempo começa) e seguir até a bandeira.<br>
   6 <b>O aplicativo</b> deverá identificar quando a lupa <b>encostar no fio</b> (o fio pisca em vermelho, toca um zumbido e o celular vibra).<br>
   7 <b>O aplicativo</b> deverá identificar quando a lupa <b>sair do fio</b> e exigir que o jogador volte ao <b>anel amarelo</b> para continuar (não é possível pular trechos).<span class="novo">novo</span><br>
@@ -123,14 +123,14 @@
       <circle cx="110" cy="160" r="5" fill="#3be07a"/>
       <rect x="247" y="104" width="1.6" height="18" fill="#333"/>
       <rect x="249" y="104" width="12" height="7" fill="#fff" stroke="#333" stroke-width="0.6"/>
-      <text x="168" y="88" fill="#1173c9">circuito virtual (RA)</text>
+      <text x="96" y="92" fill="#1173c9">circuito virtual (RA)</text>
       <!-- lupa -->
-      <ellipse cx="205" cy="112" rx="5" ry="13" fill="none" stroke="#555" stroke-width="2.2"/>
-      <line x1="205" y1="125" x2="222" y2="150" stroke="#e8641c" stroke-width="4"/>
-      <rect x="208" y="128" width="13" height="13" fill="#fff" stroke="#111" stroke-width="1" transform="rotate(-34 214 134)"/>
-      <rect x="210" y="130" width="4" height="4" fill="#111" transform="rotate(-34 214 134)"/>
-      <text x="228" y="146" fill="#111">lupa física +</text>
-      <text x="228" y="156" fill="#111">marcador (5 cm)</text>
+      <rect x="202" y="99" width="6" height="26" rx="2" fill="none" stroke="#555" stroke-width="2.2"/>
+      <rect x="198.5" y="85" width="13" height="13" fill="#fff" stroke="#111" stroke-width="1"/>
+      <rect x="200.5" y="87" width="4" height="4" fill="#111"/>
+      <rect x="205" y="92" width="4" height="4" fill="#111"/>
+      <text x="216" y="88" fill="#111">bandeirinha (6 cm)</text>
+      <text x="216" y="98" fill="#111">no topo do aro (10 cm)</text>
       <!-- celular no suporte -->
       <line x1="40" y1="160" x2="55" y2="45" stroke="#333" stroke-width="3"/>
       <rect x="42" y="22" width="34" height="18" rx="3" fill="#222" transform="rotate(32 59 31)"/>
@@ -141,8 +141,8 @@
     <div>
       <p>O <b>QR Code</b> fica na mesa e é a referência do mundo real: o circuito virtual é desenhado em cima dele,
       em escala real (cerca de 35 cm de largura e até 12 cm de altura).</p>
-      <p>O <b>marcador da lupa</b> fica em pé no cabo, como uma bandeirinha, virado para a câmera. Pela posição dele,
-      o app calcula onde está o aro e compara com o fio a cada quadro.</p>
+      <p>A <b>bandeirinha da lupa</b> fica em pé no topo do aro, atravessada, virada para a câmera; frente e verso têm desenhos
+      diferentes, então qualquer lado serve. Pela posição dela, o app calcula onde está o aro e compara com o fio a cada quadro.</p>
       <p>Depois que o circuito aparece, o QR Code pode ser coberto pela mão ou pela lupa: o circuito continua ancorado no lugar.</p>
     </div>
   </div>
@@ -168,8 +168,10 @@
   <h2>O que mudou em relação ao planejamento original, e por quê</h2>
   <table>
     <tr><th style="width:30%">Mudança</th><th>Motivo</th></tr>
-    <tr><td>A lupa física é reconhecida por um <b>marcador impresso</b> preso no cabo.</td>
+    <tr><td>A lupa física é reconhecida por uma <b>bandeirinha impressa</b> (frente e verso) presa no topo do aro.</td>
         <td>O AR Foundation (exigido no planejamento) reconhece imagens, não o formato de um aro de metal. Reconhecer o objeto em si exigiria o Vuforia (conta, licença e outra biblioteca de RA) e aros finos são difíceis de rastrear. Na versão anterior a lupa nunca era reconhecida porque a imagem "LupaMarker" não existia.</td></tr>
+    <tr><td>Depois do primeiro teste no celular: <b>imagem da câmera no fundo</b> e <b>bandeirinha nova</b>.</td>
+        <td>O renderizador usado no Android não tinha o recurso que desenha a câmera (aparecia uma cor lisa). Os marcadores tinham sido colados no plano do aro (a câmera os via de lado), eram duas cópias da mesma imagem e tinham fita por cima. A bandeirinha passou para 6 cm, com frente e verso diferentes, e o app agora usa as medidas reais do aro da equipe.</td></tr>
     <tr><td>O circuito virou um <b>fio em 3D</b> que passa por dentro do aro.</td>
         <td>É o jogo desenhado nas telas originais. "Encostar nas laterais" passou a ser "encostar no fio", e "sair das laterais" passou a ser "sair do fio".</td></tr>
     <tr><td><b>Ancoragem</b> do circuito como requisito explícito.</td>
@@ -196,21 +198,23 @@
   <code>LupaController</code> (lupa física com calibração ou virtual), <code>CircuitGameManager</code> (regras, tempo, erros, recordes),
   <code>CircuitUI</code> (todas as telas) e <code>CircuitFeedback</code> (sons e vibração). O menu do Editor
   <b>CircuitAIR &gt; Configurar projeto e cena</b> refaz a cena e as configurações do zero.</p>
-  <p><b>Testes automatizados (21, todos passando):</b> geometria do contato, curvas do fio, escolha do trecho certo do fio
-  e a garantia de que as três fases podem ser completadas sem encostar, com a argola de cada fase e com aros reais de 3, 5 e 7 cm.</p>
+  <p><b>Testes automatizados (25, todos passando):</b> geometria do contato, curvas do fio, escolha do trecho certo do fio
+  e a garantia de que as três fases podem ser completadas sem encostar, com a argola de cada fase, com aros de arame de 3, 5 e 7 cm e com o aro da equipe (10 cm, faixa de 1,5 cm; o toque vale em toda a faixa).</p>
   <p><b>Testes jogando (XR Simulation):</b> percurso perfeito nas três fases (0 erros), um toque (1 erro), sair e voltar ao fio
   (1 erro), tentativa de pular 12 cm do circuito (bloqueada), lupa física percorrendo o circuito com a câmera parada (0 erros),
-  lupa sumindo da câmera e voltando, três vezes seguidas (0 erros), e o circuito não se deslocou nenhum milímetro com o QR Code coberto.</p>
-  <p><b>Ainda falta:</b> testar num celular real com a lupa física da equipe e, se necessário, ajustar a lupa pela tela "Ajustar lupa".</p>
+  lupa sumindo da câmera e voltando, três vezes seguidas (0 erros), e o circuito não se deslocou nenhum milímetro com o QR Code coberto. Com o aro da equipe e a bandeirinha no topo, câmera parada a 58 cm:
+  as três fases sem erros, bandeirinha sumindo e voltando sem erro falso, e um toque proposital contado como 1 erro.</p>
+  <p><b>Ainda falta:</b> testar no celular a versão com a bandeirinha nova e, se o contorno não ficar sobre o aro real, ajustar pela tela "Ajustar lupa".</p>
 </div>
 
 <div class="secao quebra">
   <h2>Anexo · marcadores para imprimir (tamanho real, escala 100%)</h2>
-  <p>A moldura preta do QR Code deve medir <b>6,6 cm</b> (a imagem inteira, com a margem branca, mede 10 cm) e o marcador da lupa
-  <b>5 cm</b>. Recorte pela linha tracejada. Prenda o marcador em pé no cabo da lupa, com a borda do quadrado preto virada para o aro.</p>
+  <p>A moldura preta do QR Code deve medir <b>6,6 cm</b> (a imagem inteira, com a margem branca, mede 10 cm) e cada lado da bandeirinha
+  <b>6 cm</b>. A folha com as instruções de montagem é <code>docs/Marcadores_para_imprimir.pdf</code>: dobre a bandeirinha no meio
+  (desenhos para fora), cole com um papelão no meio e prenda em pé, atravessada, no topo do aro.</p>
   <div class="marcadores">
     <div style="text-align:center"><div class="corte"><img src="../imagens/CircuitQR.jpg" style="width:100mm;height:100mm;display:block"></div><b>CircuitQR · mesa</b></div>
-    <div style="text-align:center"><div class="corte"><img src="../imagens/LupaMarker.png" style="width:50mm;height:50mm;display:block"></div><b>LupaMarker · lupa</b></div>
+    <div style="text-align:center"><div class="corte" style="display:flex"><img src="../imagens/LupaMarker.png" style="width:60mm;height:60mm;display:block"><img src="../imagens/LupaMarkerVerso.png" style="width:60mm;height:60mm;display:block;border-left:0.3mm dashed #c00"></div><b>Bandeirinha · frente | verso (dobrar na linha vermelha)</b></div>
   </div>
 </div>
 

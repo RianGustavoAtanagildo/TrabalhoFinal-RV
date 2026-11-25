@@ -12,6 +12,7 @@ using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -36,13 +37,14 @@ namespace CircuitAIR.EditorTools
         private const string ThemePath = Root + "/CircuitAIR_Theme.asset";
         private const string QrPath = MarkersFolder + "/CircuitQR.jpg";
         private const string LupaMarkerPath = MarkersFolder + "/LupaMarker.png";
+        private const string LupaMarkerBackPath = MarkersFolder + "/LupaMarkerVerso.png";
         private const string LibraryPath = ArFolder + "/CircuitAIR_ImageLibrary.asset";
 
         /// <summary>Tamanho real do QR Code impresso (lado), em metros.</summary>
         public const float QrSizeMeters = 0.10f;
 
         /// <summary>Tamanho real do marcador da lupa física impresso (lado), em metros.</summary>
-        public const float LupaMarkerSizeMeters = 0.05f;
+        public const float LupaMarkerSizeMeters = LupaController.MarkerSizeMeters;
 
         [MenuItem("CircuitAIR/1. Importar recursos do TextMeshPro")]
         public static void ImportTextMeshProEssentials()
@@ -70,16 +72,82 @@ namespace CircuitAIR.EditorTools
             EnsureFolder(ArFolder);
 
             Texture2D qr = SetupQrTexture(report);
-            Texture2D lupaMarker = SetupLupaMarkerTexture(report);
-            XRReferenceImageLibrary library = SetupImageLibrary(qr, lupaMarker, report);
+            Texture2D lupaMarker = SetupLupaMarkerTexture(LupaMarkerPath, 20260425, report);
+            Texture2D lupaMarkerBack = SetupLupaMarkerTexture(LupaMarkerBackPath, 20261125, report);
+            XRReferenceImageLibrary library = SetupImageLibrary(qr, lupaMarker, lupaMarkerBack, report);
             CircuitTheme theme = SetupTheme(report);
             SetupScene(theme, library, report);
             SetupPlayerSettings(report);
+            SetupArBackground(report);
             SetupXrPlugins(report);
             SetupSimulationEnvironment(lupaMarker, report);
             AssetDatabase.SaveAssets();
             report.AppendLine("Configuração concluída.");
             return report.ToString();
+        }
+
+        // ------------------------------------------------------------------
+        // Imagem da câmera no fundo (URP)
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Garante o ARBackgroundRendererFeature em todos os renderizadores URP usados pelos níveis de qualidade.
+        /// Sem ele, o celular desenha uma cor lisa no lugar da imagem da câmera (o Android usa o nível "Mobile").
+        /// </summary>
+        public static void SetupArBackground(StringBuilder report)
+        {
+            var pipelines = new HashSet<RenderPipelineAsset>();
+            if (GraphicsSettings.defaultRenderPipeline != null)
+                pipelines.Add(GraphicsSettings.defaultRenderPipeline);
+            for (int i = 0; i < QualitySettings.count; i++)
+            {
+                RenderPipelineAsset pipeline = QualitySettings.GetRenderPipelineAssetAt(i);
+                if (pipeline != null)
+                    pipelines.Add(pipeline);
+            }
+
+            foreach (RenderPipelineAsset pipeline in pipelines)
+            {
+                SerializedProperty list = new SerializedObject(pipeline).FindProperty("m_RendererDataList");
+                if (list == null)
+                    continue;
+                for (int i = 0; i < list.arraySize; i++)
+                {
+                    if (list.GetArrayElementAtIndex(i).objectReferenceValue is ScriptableRendererData data)
+                        report.AppendLine(EnsureArBackgroundFeature(data));
+                }
+            }
+        }
+
+        private static string EnsureArBackgroundFeature(ScriptableRendererData data)
+        {
+            foreach (ScriptableRendererFeature existing in data.rendererFeatures)
+            {
+                if (existing is ARBackgroundRendererFeature)
+                {
+                    existing.SetActive(true);
+                    return "Fundo da câmera: " + data.name + " já desenha a câmera.";
+                }
+            }
+
+            // Mesmo procedimento do botão "Add Renderer Feature" do inspetor da URP.
+            var feature = ScriptableObject.CreateInstance<ARBackgroundRendererFeature>();
+            feature.name = nameof(ARBackgroundRendererFeature);
+            AssetDatabase.AddObjectToAsset(feature, data);
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(feature, out string _, out long localId);
+
+            var serialized = new SerializedObject(data);
+            SerializedProperty features = serialized.FindProperty("m_RendererFeatures");
+            SerializedProperty map = serialized.FindProperty("m_RendererFeatureMap");
+            features.arraySize++;
+            features.GetArrayElementAtIndex(features.arraySize - 1).objectReferenceValue = feature;
+            map.arraySize++;
+            map.GetArrayElementAtIndex(map.arraySize - 1).longValue = localId;
+            serialized.ApplyModifiedProperties();
+            data.SetDirty();
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssets();
+            return "Fundo da câmera: ARBackgroundRendererFeature adicionado em " + data.name + ".";
         }
 
         // ------------------------------------------------------------------
@@ -97,16 +165,16 @@ namespace CircuitAIR.EditorTools
             return AssetDatabase.LoadAssetAtPath<Texture2D>(QrPath);
         }
 
-        private static Texture2D SetupLupaMarkerTexture(StringBuilder report)
+        private static Texture2D SetupLupaMarkerTexture(string path, int seed, StringBuilder report)
         {
-            if (!File.Exists(LupaMarkerPath))
+            if (!File.Exists(path))
             {
-                File.WriteAllBytes(LupaMarkerPath, LupaMarkerGenerator.Generate(1024, 20260425).EncodeToPNG());
-                AssetDatabase.ImportAsset(LupaMarkerPath);
-                report.AppendLine("Marcador da lupa física criado em " + LupaMarkerPath);
+                File.WriteAllBytes(path, LupaMarkerGenerator.Generate(1024, seed).EncodeToPNG());
+                AssetDatabase.ImportAsset(path);
+                report.AppendLine("Marcador da lupa física criado em " + path);
             }
-            ConfigureMarkerImporter(LupaMarkerPath);
-            return AssetDatabase.LoadAssetAtPath<Texture2D>(LupaMarkerPath);
+            ConfigureMarkerImporter(path);
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
         private static void ConfigureMarkerImporter(string path)
@@ -122,7 +190,7 @@ namespace CircuitAIR.EditorTools
                 importer.SaveAndReimport();
         }
 
-        private static XRReferenceImageLibrary SetupImageLibrary(Texture2D qr, Texture2D lupaMarker, StringBuilder report)
+        private static XRReferenceImageLibrary SetupImageLibrary(Texture2D qr, Texture2D lupaMarker, Texture2D lupaMarkerBack, StringBuilder report)
         {
             if (!File.Exists(LibraryPath) && File.Exists("Assets/CircuitAIR_ImageLibrary.asset"))
                 AssetDatabase.MoveAsset("Assets/CircuitAIR_ImageLibrary.asset", LibraryPath);
@@ -136,8 +204,9 @@ namespace CircuitAIR.EditorTools
 
             SetImage(library, "CircuitQR", qr, QrSizeMeters);
             SetImage(library, "LupaMarker", lupaMarker, LupaMarkerSizeMeters);
+            SetImage(library, "LupaMarkerVerso", lupaMarkerBack, LupaMarkerSizeMeters);
             EditorUtility.SetDirty(library);
-            report.AppendLine($"Biblioteca de imagens: {library.count} imagens (CircuitQR {QrSizeMeters * 100f:0} cm, LupaMarker {LupaMarkerSizeMeters * 100f:0} cm).");
+            report.AppendLine($"Biblioteca de imagens: {library.count} imagens (CircuitQR {QrSizeMeters * 100f:0} cm, LupaMarker e LupaMarkerVerso {LupaMarkerSizeMeters * 100f:0} cm).");
             return library;
         }
 
@@ -392,6 +461,8 @@ namespace CircuitAIR.EditorTools
             lupaSerialized.FindProperty("markerToRingOffset").vector3Value = LupaController.DefaultMarkerOffset;
             lupaSerialized.FindProperty("markerToRingTilt").floatValue = LupaController.DefaultMarkerTilt;
             lupaSerialized.FindProperty("physicalRingRadius").floatValue = LupaController.DefaultPhysicalRadius;
+            lupaSerialized.FindProperty("physicalTubeRadius").floatValue = LupaController.DefaultPhysicalTubeRadius;
+            lupaSerialized.FindProperty("physicalHalfDepth").floatValue = LupaController.DefaultPhysicalHalfDepth;
             lupaSerialized.ApplyModifiedPropertiesWithoutUndo();
             lupaTransform.localPosition = LupaController.DefaultCameraOffset;
 
@@ -549,6 +620,14 @@ namespace CircuitAIR.EditorTools
                 if (behaviour.name == SimulatedLupaName)
                 {
                     hasLupa = true;
+                    var lupaSerialized = new SerializedObject(behaviour);
+                    SerializedProperty lupaSize = lupaSerialized.FindProperty("m_ImagePhysicalSizeMeters");
+                    if (lupaSize != null && lupaSize.vector2Value != new Vector2(LupaMarkerSizeMeters, LupaMarkerSizeMeters))
+                    {
+                        lupaSize.vector2Value = new Vector2(LupaMarkerSizeMeters, LupaMarkerSizeMeters);
+                        lupaSerialized.ApplyModifiedPropertiesWithoutUndo();
+                        changed++;
+                    }
                     continue;
                 }
                 qrImage = behaviour;

@@ -4,58 +4,122 @@
 <meta charset="utf-8">
 <title>Circuit AIR · Marcadores para imprimir</title>
 <style>
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4; margin: 8mm; }
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Arial, sans-serif; color: #111; margin: 0; font-size: 10.5pt; }
-  h1 { font-size: 17pt; margin: 0 0 2mm; }
-  p { margin: 0 0 2mm; line-height: 1.35; }
-  .aviso { border: 0.4mm solid #111; padding: 3mm 4mm; margin: 3mm 0 6mm; }
-  .linha { display: flex; gap: 14mm; align-items: flex-start; }
-  .item { text-align: center; }
-  .corte { display: inline-block; border: 0.25mm dashed #888; padding: 4mm; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: #111; margin: 0; font-size: 9.2pt; }
+  h1 { font-size: 16pt; margin: 0 0 2mm; }
+  h2 { font-size: 11.5pt; margin: 0 0 2mm; }
+  p { margin: 0 0 1.5mm; line-height: 1.35; }
+  .aviso { border: 0.4mm solid #111; padding: 2mm 3mm; margin: 1.5mm 0 3mm; }
+  .linha { display: flex; gap: 8mm; align-items: flex-start; }
+  .corte { display: inline-block; border: 0.25mm dashed #888; }
+  .qr-box { padding: 3mm; }
   .qr { width: 100mm; height: 100mm; display: block; }
-  .lupa { width: 50mm; height: 50mm; display: block; }
-  .rotulo { font-weight: 600; margin-top: 2mm; }
-  .regua { margin-top: 8mm; }
-  .regua-barra { width: 100mm; height: 4mm; border: 0.3mm solid #111; border-top: none;
-                 background: repeating-linear-gradient(90deg, #111 0 0.3mm, transparent 0.3mm 10mm); }
-  ol { margin: 2mm 0 0 5mm; padding: 0; line-height: 1.4; }
+  .rotulo { font-weight: 600; margin-top: 1.5mm; text-align: center; }
+
+  /* Bandeirinha: frente e verso lado a lado, dobra no meio, margem de 1 cm embaixo para prender no aro. */
+  .flag { position: relative; width: 130mm; height: 81mm; }
+  .flag .lado { position: absolute; top: 6mm; width: 60mm; height: 60mm; display: block; }
+  .flag .frente { left: 5mm; }
+  .flag .verso { left: 65mm; }
+  .flag .dobra { position: absolute; left: 65mm; top: 0; bottom: 0; border-left: 0.35mm dashed #c00; }
+  .flag .dobra span { position: absolute; top: 1mm; left: 1mm; font-size: 7pt; color: #c00; white-space: nowrap; }
+  .flag .topo { position: absolute; top: 1mm; font-size: 7.5pt; color: #444; width: 60mm; text-align: center; }
+  .flag .fita { position: absolute; top: 66mm; height: 10mm; left: 5mm; width: 120mm; border-top: 0.2mm solid #bbb;
+                font-size: 7.5pt; color: #444; display: flex; align-items: center; justify-content: center; }
+  .regua { width: 100mm; height: 3.5mm; border: 0.3mm solid #111; border-top: none; margin-top: 3mm;
+           background: repeating-linear-gradient(90deg, #111 0 0.3mm, transparent 0.3mm 10mm); }
+  ol { margin: 1mm 0 0 5mm; padding: 0; line-height: 1.3; }
+  li { margin-bottom: 0.8mm; }
+  .montagem { display: flex; justify-content: center; margin-top: 2mm; }
+  .diagramas { display: flex; gap: 4mm; margin-top: 2mm; }
+  .montagem svg { flex: none; }
+  .legenda { font-size: 8pt; color: #333; text-align: center; margin-top: 1mm; }
 </style>
 </head>
 <body>
   <h1>Circuit AIR · marcadores para imprimir</h1>
   <div class="aviso">
-    <b>Imprima em tamanho real (escala 100%, sem "ajustar à página").</b> Depois de imprimir, confira com uma régua:
-    a <b>moldura preta do QR Code mede 6,6 cm</b> (a imagem inteira, com a margem branca, mede 10 cm) e o
-    <b>marcador da lupa mede 5 cm</b> de borda a borda. A régua de 10 cm abaixo também serve para conferir.
-    Recorte pela linha tracejada e use papel fosco: brilho atrapalha a câmera.
+    <b>Imprima em tamanho real (escala 100%, sem "ajustar à página") e em papel fosco.</b> Confira com a régua:
+    a <b>moldura preta do QR Code mede 6,6 cm</b> (com a margem branca, 10 cm) e <b>cada quadrado da bandeirinha mede 6 cm</b>
+    de borda a borda. Se os tamanhos não baterem, o app calcula a posição da lupa errado.
+    <div class="regua"></div>
+    <p style="margin-top:1mm">Régua de conferência: 10 cm (traços a cada 1 cm).</p>
   </div>
 
   <div class="linha">
-    <div class="item">
-      <div class="corte"><img class="qr" src="../imagens/CircuitQR.jpg" alt="QR Code do circuito"></div>
-      <div class="rotulo">CircuitQR · 10 cm · vai na mesa</div>
+    <div>
+      <div class="corte qr-box"><img class="qr" src="../imagens/CircuitQR.jpg" alt="QR Code do circuito"></div>
+      <div class="rotulo">CircuitQR · vai deitado na mesa</div>
     </div>
-    <div class="item">
-      <div class="corte"><img class="lupa" src="../imagens/LupaMarker.png" alt="Marcador da lupa"></div>
-      <div class="rotulo">LupaMarker · 5 cm · vai na lupa</div>
-      <p style="text-align:left; margin-top:4mm; max-width:62mm">
-        <b>Como prender:</b> cole num cartão rígido e prenda <b>em pé no cabo</b>, como uma bandeirinha,
-        perpendicular ao aro, com a <b>borda do quadrado preto virada para o aro</b>. Se preferir colar deitado
-        no plano do aro, use o botão "Girar 90°" em Ajustar lupa.
-      </p>
+    <div>
+      <h2>Como montar a lupa</h2>
+      <ol>
+        <li>Recorte a <b>bandeirinha</b> (abaixo) pela linha tracejada cinza.</li>
+        <li><b>Dobre na linha vermelha</b> com os desenhos para fora e cole as costas uma na outra, com um
+            <b>papelão de 6 × 7 cm</b> no meio para ficar firme e reto.</li>
+        <li>Prenda a faixa branca de baixo <b>no topo do aro</b> com fita. A bandeirinha fica <b>em pé</b>,
+            com a seta "topo" para cima e <b>atravessada</b> no aro (veja o desenho): olhando o aro de lado, ela some;
+            olhando o aro pela borda, ela aparece inteira.</li>
+        <li><b>Nunca passe fita por cima dos desenhos</b> (brilha) e tire os marcadores antigos da lupa.</li>
+        <li>Celular num suporte a <b>50–60 cm</b> do QR Code, com o circuito inteiro na tela.</li>
+        <li>No app, se o contorno azul não ficar em cima do aro real, use <b>Ajustar lupa</b>.</li>
+      </ol>
+      <div class="diagramas">
+    <div>
+      <svg width="32mm" height="45.5mm" viewBox="0 0 52 74" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="3">
+        <!-- Visto pela câmera, com o fio indo da esquerda para a direita: o aro aparece de lado (faixa de 1,5 cm)
+             e a bandeirinha aparece de frente. -->
+        <text x="26" y="3.5" text-anchor="middle" font-weight="600">como a câmera vê</text>
+        <line x1="2" y1="51" x2="50" y2="51" stroke="#1e88e5" stroke-width="0.9"/>
+        <text x="48" y="49.5" text-anchor="end" fill="#1e88e5">fio</text>
+        <rect x="22.25" y="31" width="7.5" height="40" fill="#222" rx="1"/>
+        <rect x="23.25" y="33" width="5.5" height="36" fill="#fff" rx="0.6"/>
+        <rect x="11" y="7" width="30" height="24" fill="#fff" stroke="#111" stroke-width="0.5"/>
+        <rect x="14" y="7.5" width="24" height="20" fill="#111"/>
+        <rect x="17" y="10.5" width="18" height="14" fill="#fff"/>
+        <rect x="19" y="12.5" width="5" height="4" fill="#111"/><rect x="27" y="17" width="6" height="5" fill="#111"/>
+        <text x="44" y="19" fill="#c00">6 cm</text>
+        <text x="26" y="72.5" text-anchor="middle">aro visto pela borda</text>
+      </svg>
+      <div class="legenda">bandeirinha de frente</div>
+    </div>
+
+    <div>
+      <svg width="32mm" height="45.5mm" viewBox="0 0 52 74" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="3">
+        <!-- Visto de lado: o aro aparece redondo e a bandeirinha aparece como uma linha em pé no topo. -->
+        <text x="26" y="3.5" text-anchor="middle" font-weight="600">visto de lado</text>
+        <circle cx="26" cy="49" r="20" fill="none" stroke="#222" stroke-width="2"/>
+        <circle cx="26" cy="49" r="1" fill="#1e88e5"/>
+        <text x="29" y="50" fill="#1e88e5">fio</text>
+        <rect x="25.4" y="5" width="1.2" height="24" fill="#111"/>
+        <line x1="4" y1="29" x2="4" y2="69" stroke="#c00" stroke-width="0.3"/>
+        <text x="3" y="49" fill="#c00" text-anchor="middle" transform="rotate(-90 3 49)">10 cm</text>
+        <text x="29" y="15" fill="#444">bandeirinha</text>
+        <text x="26" y="72.5" text-anchor="middle">aro de frente</text>
+      </svg>
+      <div class="legenda">bandeirinha vira uma linha</div>
+    </div>
+      </div>
     </div>
   </div>
 
-  <div class="regua">
-    <div class="regua-barra"></div>
-    <p>Régua de conferência: 10 cm (traços a cada 1 cm).</p>
-  </div>
+  <div class="montagem">
+    <div>
+      <div class="corte">
+        <div class="flag">
+          <div class="topo" style="left:5mm">↑ topo (frente)</div>
+          <div class="topo" style="left:65mm">↑ topo (verso)</div>
+          <img class="lado frente" src="../imagens/LupaMarker.png" alt="Bandeirinha, frente">
+          <img class="lado verso" src="../imagens/LupaMarkerVerso.png" alt="Bandeirinha, verso">
+          <div class="dobra"><span>dobre aqui</span></div>
+          <div class="fita">faixa para a fita · encosta no topo do aro</div>
+        </div>
+      </div>
+      <div class="rotulo">Bandeirinha da lupa · frente e verso · 6 cm</div>
+    </div>
 
-  <ol>
-    <li>Coloque o QR Code sobre uma mesa bem iluminada, sem reflexo.</li>
-    <li>Coloque o celular num suporte apontado para o QR Code, a 40 a 60 cm.</li>
-    <li>No app, use <b>Ajustar lupa</b> uma vez para alinhar o contorno azul com o aro real.</li>
-  </ol>
+
+  </div>
 </body>
 </html>

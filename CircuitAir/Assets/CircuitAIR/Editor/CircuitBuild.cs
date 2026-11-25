@@ -54,6 +54,11 @@ namespace CircuitAIR.EditorTools
             if (scenes.Length == 0)
                 return "ERRO: nenhuma cena na lista de build. Rode CircuitAIR/2. Configurar projeto e cena.";
 
+            // Sem o ARBackgroundRendererFeature no renderizador do Android, o celular mostra uma cor lisa no lugar da câmera.
+            var setupReport = new System.Text.StringBuilder();
+            CircuitProjectSetup.SetupArBackground(setupReport);
+            Debug.Log("[CircuitBuild] " + setupReport.ToString().Trim());
+
             EditorUserBuildSettings.buildAppBundle = false;
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
 

@@ -32,6 +32,15 @@ namespace CircuitAIR
         /// <summary>Ponto (m ao longo do fio) onde fica o anel-guia de início.</summary>
         public float StartGuideDistance { get; private set; }
 
+        /// <summary>Anel-guia de início: 3,5 cm depois da curva que sai do poste de início.</summary>
+        public static float StartGuideFor(float[] controlDistances) => controlDistances[1] + 0.035f;
+
+        /// <summary>
+        /// Chegada: 3 cm antes do último canto (antes do fio descer para o poste). Na descida a lupa teria de
+        /// virar de lado e a bandeirinha sairia da imagem da câmera.
+        /// </summary>
+        public static float FinishFor(float[] controlDistances) => controlDistances[controlDistances.Length - 2] - 0.03f;
+
         public void Build(CircuitLevel level, CircuitTheme circuitTheme)
         {
             for (int i = transform.childCount - 1; i >= 0; i--)
@@ -42,9 +51,9 @@ namespace CircuitAIR
             Path = WirePath.FromControlPoints(level.Points, level.CornerRadius, SampleSpacing);
 
             float[] control = Path.ControlPointDistances;
-            StartGuideDistance = control[1] + 0.035f;
+            StartGuideDistance = StartGuideFor(control);
             StartZoneEnd = control[1] + 0.07f;
-            FinishDistance = control[control.Length - 2] - 0.01f;
+            FinishDistance = FinishFor(control);
 
             wireRenderer = CreateMesh("Fio", TubeMesh.Build(Path.Points, level.WireRadius, 12), theme ? theme.Wire : null);
             if (theme != null && theme.WireGlow != null)
@@ -60,6 +69,7 @@ namespace CircuitAIR
             PlaceRingMarker(startGuide, StartGuideDistance);
             rejoinMarker = CreateRingMarker("Marcador de volta ao fio", theme ? theme.RejoinMarker : null, level.RingRadius * 1.05f);
             rejoinMarker.gameObject.SetActive(false);
+            GuideRadius = level.RingRadius * 1.05f;
         }
 
         /// <summary>Pisca o fio em vermelho quando a lupa encosta.</summary>
@@ -72,6 +82,27 @@ namespace CircuitAIR
             {
                 wireRenderer.sharedMaterial = theme.WireHit;
                 flashing = true;
+            }
+        }
+
+        /// <summary>Raio atual dos anéis-guia (m).</summary>
+        public float GuideRadius { get; private set; }
+
+        /// <summary>Muda o raio dos anéis-guia (início e volta ao fio) para o tamanho da lupa em uso.</summary>
+        public void SetGuideRadius(float radius)
+        {
+            if (Mathf.Abs(radius - GuideRadius) < 1e-4f || radius <= 0f)
+                return;
+            GuideRadius = radius;
+            Mesh ring = TubeMesh.Torus(radius, 0.0016f, 48, 8);
+            foreach (Transform marker in new[] { startGuide, rejoinMarker })
+            {
+                if (marker == null)
+                    continue;
+                var filter = marker.GetComponent<MeshFilter>();
+                if (filter.sharedMesh != null)
+                    Destroy(filter.sharedMesh);
+                filter.sharedMesh = ring;
             }
         }
 

@@ -14,9 +14,10 @@ namespace CircuitAIR
     /// <summary>
     /// A lupa do jogo. Informa ao jogo onde está a argola (centro, direção e raio) em coordenadas do mundo.
     ///
-    /// Modo físico (padrão): a câmera reconhece o marcador LupaMarker preso no cabo da lupa real; a argola
-    /// fica num deslocamento fixo em relação ao marcador. Esse deslocamento é calibrado na tela "Ajustar lupa"
-    /// e salvo no aparelho. Um contorno virtual aparece sobre o aro real (vermelho ao encostar, verde no fio).
+    /// Modo físico (padrão): a câmera reconhece a bandeirinha presa em pé no topo do aro real (marcador
+    /// LupaMarker na frente e LupaMarkerVerso atrás); a argola fica num deslocamento fixo em relação ao
+    /// marcador. Esse deslocamento é calibrado na tela "Ajustar lupa" e salvo no aparelho. Um contorno
+    /// virtual aparece sobre o aro real (vermelho ao encostar, verde no fio).
     ///
     /// Modo virtual: o modelo Lupa_CircuitAIR fica preso na frente da câmera e o jogador move o celular.
     /// </summary>
@@ -29,12 +30,14 @@ namespace CircuitAIR
         [Header("Lupa física (marcador LupaMarker)")]
         [Tooltip("Centro do aro em relação ao centro do marcador, em metros, no espaço da imagem: X = direita da imagem, Y = saindo da imagem, Z = topo da imagem.")]
         [SerializeField] private Vector3 markerToRingOffset = DefaultMarkerOffset;
-        [Tooltip("Giro do aro em torno do eixo do cabo (graus). 90 = marcador em pé no cabo, como bandeirinha (padrão); 0 = marcador deitado no mesmo plano do aro.")]
+        [Tooltip("Giro do aro em torno do eixo vertical da imagem (graus). 90 = bandeirinha perpendicular ao aro (padrão); 0 = marcador colado no mesmo plano do aro.")]
         [SerializeField] private float markerToRingTilt = DefaultMarkerTilt;
-        [Tooltip("Raio do centro do aro da lupa real, em metros (metade do diâmetro medido no meio do arame).")]
+        [Tooltip("Raio do aro real até o meio da parede, em metros.")]
         [SerializeField] private float physicalRingRadius = DefaultPhysicalRadius;
-        [Tooltip("Meia espessura do arame do aro real, em metros.")]
-        [SerializeField] private float physicalTubeRadius = 0.0015f;
+        [Tooltip("Meia espessura da parede do aro real, em metros.")]
+        [SerializeField] private float physicalTubeRadius = DefaultPhysicalTubeRadius;
+        [Tooltip("Meia largura da faixa do aro real (ao longo do eixo), em metros. 0 para aro de arame.")]
+        [SerializeField] private float physicalHalfDepth = DefaultPhysicalHalfDepth;
         [Tooltip("Tempo (s) que a lupa continua valendo depois que o marcador some da câmera (tremida, desfoque).")]
         [SerializeField] private float markerGraceSeconds = 0.3f;
         [Tooltip("Suavização do movimento do marcador (maior = segue mais rápido, menor = mais estável).")]
@@ -56,18 +59,32 @@ namespace CircuitAIR
         /// <summary>Posição padrão da argola virtual em relação à câmera (m).</summary>
         public static readonly Vector3 DefaultCameraOffset = new Vector3(0f, -0.02f, 0.15f);
 
-        /// <summary>Padrão: marcador de 5 cm preso no cabo, com o topo da imagem virado para o aro.</summary>
-        public static readonly Vector3 DefaultMarkerOffset = new Vector3(0f, 0f, 0.065f);
+        // Aro da equipe: 10 cm de diâmetro por fora, parede de 2 mm, faixa de 1,5 cm de largura.
+        public const float DefaultPhysicalRadius = 0.049f;
+        public const float DefaultPhysicalTubeRadius = 0.001f;
+        public const float DefaultPhysicalHalfDepth = 0.0075f;
 
-        public const float DefaultPhysicalRadius = 0.025f;
+        /// <summary>Lado do marcador impresso da lupa (frente e verso), em metros.</summary>
+        public const float MarkerSizeMeters = 0.06f;
 
-        /// <summary>Padrão: marcador em pé no cabo (perpendicular ao aro), para continuar de frente para a câmera.</summary>
+        /// <summary>Margem branca da bandeirinha entre a borda de baixo do marcador e o topo do aro, em metros.</summary>
+        public const float FlagBottomMarginMeters = 0.01f;
+
+        /// <summary>
+        /// Padrão: bandeirinha em pé no topo do aro, com o topo da imagem para cima. O centro do aro fica
+        /// abaixo do centro do marcador: raio externo (5 cm) + margem (1 cm) + meio marcador (3 cm).
+        /// </summary>
+        public static readonly Vector3 DefaultMarkerOffset =
+            new Vector3(0f, 0f, -(DefaultPhysicalRadius + DefaultPhysicalTubeRadius + FlagBottomMarginMeters + MarkerSizeMeters * 0.5f));
+
+        /// <summary>Padrão: bandeirinha perpendicular ao aro, para ficar de frente para a câmera com o fio indo da esquerda para a direita.</summary>
         public const float DefaultMarkerTilt = 90f;
 
-        /// <summary>Rotação do aro em relação ao marcador: giro em torno do eixo do cabo (Z da imagem).</summary>
+        /// <summary>Rotação do aro em relação ao marcador: giro em torno do eixo vertical da imagem (Z da imagem).</summary>
         public static Quaternion MarkerToRingRotation(float tilt) => Quaternion.Euler(0f, 0f, tilt);
 
-        private const string PrefsPrefix = "circuitair.lupa.";
+        // "lupa2": a calibração salva com o marcador antigo (5 cm, no cabo) não vale mais.
+        private const string PrefsPrefix = "circuitair.lupa2.";
 
         private Transform model;
         private MeshRenderer modelRenderer;
@@ -96,6 +113,9 @@ namespace CircuitAIR
                 return Mathf.Max(0.0015f, RingRadius * ratio);
             }
         }
+
+        /// <summary>Meia largura da faixa do aro (ao longo do eixo), em metros. 0 na lupa virtual.</summary>
+        public float RingHalfDepth => mode == LupaMode.PhysicalMarker ? Mathf.Max(0f, physicalHalfDepth) : 0f;
 
         /// <summary>Verdadeiro quando o jogo sabe onde a lupa está.</summary>
         public bool HasPose => mode == LupaMode.Virtual
@@ -213,13 +233,16 @@ namespace CircuitAIR
                 return;
 
             // Depois de perder o marcador, usa direto a posição nova (sem "deslizar" da posição antiga).
-            if (!hasMarkerPose || Time.time - lastMarkerTime > 0.15f)
+            float sinceLastUpdate = Time.time - lastMarkerTime;
+            if (!hasMarkerPose || sinceLastUpdate > 0.15f)
             {
                 markerPose = pose;
             }
             else
             {
-                float t = 1f - Mathf.Exp(-markerSmoothing * Time.deltaTime);
+                // A suavização usa o intervalo entre leituras do marcador (não o tempo do quadro): o AR pode
+                // atualizar a imagem bem menos vezes por segundo do que o app desenha, e aí o aro ficaria para trás.
+                float t = 1f - Mathf.Exp(-markerSmoothing * Mathf.Max(sinceLastUpdate, Time.deltaTime));
                 markerPose = new Pose(Vector3.Lerp(markerPose.position, pose.position, t),
                                       Quaternion.Slerp(markerPose.rotation, pose.rotation, t));
             }
@@ -318,7 +341,11 @@ namespace CircuitAIR
                 model.localScale = Vector3.one * (levelRingRadius / meshRadius);
             }
             if (overlay != null)
-                overlay.localScale = Vector3.one * physicalRingRadius;
+            {
+                // O toro tem tubo de 0,07 (raio 1). No eixo do aro (Z da malha) estica até a largura da faixa real.
+                float axial = Mathf.Max(physicalRingRadius, physicalHalfDepth / 0.07f);
+                overlay.localScale = new Vector3(physicalRingRadius, physicalRingRadius, axial);
+            }
         }
 
         private void BuildModel()

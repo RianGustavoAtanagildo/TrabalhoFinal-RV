@@ -331,15 +331,16 @@ namespace CircuitAIR
         {
             RectTransform body = Modal("Como jogar", "Como jogar", 1420f, out GameObject root);
             var text = Label(body,
-                "1. Imprima o QR Code com 10 cm e o marcador da lupa com 5 cm.\n" +
-                "2. Prenda o marcador <b>em pé no cabo da lupa</b>, como uma bandeirinha, com a borda do quadrado preto virada para o aro.\n" +
-                "3. Coloque o QR Code na mesa e o celular num suporte apontado para ele, até o circuito aparecer. " +
+                "1. Imprima a folha de marcadores em tamanho real: QR Code de 10 cm e bandeirinha da lupa de 6 cm.\n" +
+                "2. Dobre a bandeirinha (desenhos para fora), cole num papelão e prenda <b>em pé no topo do aro</b>, " +
+                "atravessada (de lado para o aro), sem fita por cima dos desenhos.\n" +
+                "3. Coloque o QR Code na mesa e o celular num suporte a 50–60 cm, com o circuito inteiro na tela. " +
                 "O circuito fica ancorado: a mão ou a lupa podem passar por cima do QR Code.\n" +
-                "4. Na primeira vez, use <b>Ajustar lupa</b> para o contorno azul ficar em cima do aro real.\n" +
+                "4. Se o contorno azul não ficar em cima do aro real, use <b>Ajustar lupa</b>.\n" +
                 "5. Toque em <b>INICIAR</b>, encaixe o aro no fio dentro do <color=#59F28C>anel verde</color> e leve até a bandeira.\n\n" +
                 "<b>Erros:</b> cada toque no fio conta 1 erro (o fio pisca e o celular vibra). " +
                 "Sair do fio também conta 1 erro: volte ao <color=#FFD24A>anel amarelo</color> para continuar. " +
-                "Mantenha o marcador virado para a câmera.\n\n" +
+                "Mantenha a bandeirinha virada para a câmera (qualquer um dos dois lados serve).\n\n" +
                 "<b>Sem lupa física?</b> Toque em \"Lupa: física\" para usar a lupa virtual, presa ao celular.",
                 35, Color.white, TextAlignmentOptions.TopLeft, false);
             Place(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -665f), new Vector2(860f, 1110f));
@@ -450,8 +451,8 @@ namespace CircuitAIR
             var title = Label(body, "Ajustar lupa física", 50, Color.white, TextAlignmentOptions.Center, true);
             Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -50f), new Vector2(980f, 70f));
             var help = Label(body,
-                "Segure a lupa com o marcador virado para a câmera e use os botões até o contorno azul ficar em cima do aro de verdade. " +
-                "As direções seguem o marcador: <b>Subir</b> = para a borda do quadrado preto.",
+                "Segure a lupa com a bandeirinha virada para a câmera e use os botões até o contorno azul ficar em cima do aro de verdade. " +
+                "As direções seguem a bandeirinha: <b>Subir</b> = para o topo dela.",
                 28, new Color(1f, 1f, 1f, 0.8f), TextAlignmentOptions.Center, false);
             Place(help.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -130f), new Vector2(980f, 100f));
             calibrationStatus = Label(body, string.Empty, 30, Color.white, TextAlignmentOptions.Center, true);

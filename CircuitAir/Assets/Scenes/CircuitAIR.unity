@@ -642,8 +642,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CircuitARController
   trackedImageManager: {fileID: 717635811}
   anchorManager: {fileID: 717635812}
+  cameraManager: {fileID: 0}
+  preferHighResolutionCamera: 1
   circuitImageName: CircuitQR
   lupaImageName: LupaMarker
+  lupaBackImageName: LupaMarkerVerso
   theme: {fileID: 11400000, guid: 372b0d4d82761b94989956b34c1aca82, type: 2}
   lupa: {fileID: 1793025422}
   circuitOffset: {x: 0, y: 0, z: 0}
@@ -934,10 +937,11 @@ MonoBehaviour:
   theme: {fileID: 11400000, guid: 372b0d4d82761b94989956b34c1aca82, type: 2}
   arCamera: {fileID: 30167553}
   mode: 1
-  markerToRingOffset: {x: 0, y: 0, z: 0.065}
+  markerToRingOffset: {x: 0, y: 0, z: -0.089999996}
   markerToRingTilt: 90
-  physicalRingRadius: 0.025
-  physicalTubeRadius: 0.0015
+  physicalRingRadius: 0.049
+  physicalTubeRadius: 0.001
+  physicalHalfDepth: 0.0075
   markerGraceSeconds: 0.25
   markerSmoothing: 25
   cameraOffset: {x: 0, y: -0.02, z: 0.15}

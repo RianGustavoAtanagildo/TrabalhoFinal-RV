@@ -214,6 +214,11 @@ namespace CircuitAIR
 
         private void Update()
         {
+            // Os anéis-guia (início e volta ao fio) têm o tamanho da lupa em uso (aro real ou virtual).
+            CircuitWire guideCircuit = arController != null ? arController.Circuit : null;
+            if (guideCircuit != null && lupa != null)
+                guideCircuit.SetGuideRadius(lupa.RingRadius * 1.05f);
+
             if (phase == GamePhase.WaitingForCircuit && HasCircuit)
                 EnterWaitingForStart();
 
@@ -246,6 +251,7 @@ namespace CircuitAIR
             Vector3 center = space.InverseTransformPoint(lupa.RingCenter);
             Vector3 normal = space.InverseTransformDirection(lupa.RingNormal).normalized;
             float radius = lupa.RingRadius;
+            float halfDepth = lupa.RingHalfDepth;
             float touchDistance = circuit.Level.WireRadius + lupa.RingTubeRadius;
 
             // Verifica em passos pequenos entre o quadro anterior e o atual, para um movimento
@@ -271,7 +277,7 @@ namespace CircuitAIR
                 float f = s / (float)steps;
                 Vector3 c = hasPreviousRing ? Vector3.Lerp(previousCenter, center, f) : center;
                 Vector3 n = hasPreviousRing ? Vector3.Slerp(previousNormal, normal, f) : normal;
-                RingQuery query = WireRingMath.Query(circuit.Path, c, n, radius, offWire ? maxProgress : progress);
+                RingQuery query = WireRingMath.Query(circuit.Path, c, n, radius, offWire ? maxProgress : progress, halfDepth);
                 bool touching = query.MinDistance <= touchDistance;
                 anyTouching |= touching;
                 threaded = query.Threaded;
