@@ -34,3 +34,6 @@ Thumbs.db
 *.csproj
 *.sln
 *.slnx
+
+# Temporários da Unity
+.utmp/

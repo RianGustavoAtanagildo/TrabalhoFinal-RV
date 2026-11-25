@@ -490,6 +490,8 @@ namespace CircuitAIR.EditorTools
 
             var arcore = ARCoreSettings.GetOrCreateSettings();
             arcore.requirement = ARCoreSettings.Requirement.Required;
+            // O jogo não usa a Depth API; como "Required" ela esconderia o app de celulares ARCore sem profundidade.
+            arcore.depth = ARCoreSettings.Requirement.Optional;
             EditorUtility.SetDirty(arcore);
 
             report.AppendLine("Player: Circuit AIR, com.equipe4.circuitair, retrato, Android ARM64/IL2CPP/GLES3, ARCore obrigatório, câmera iOS descrita.");

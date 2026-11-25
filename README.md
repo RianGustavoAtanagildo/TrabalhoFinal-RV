@@ -80,7 +80,11 @@ refaz tudo (biblioteca de imagens, materiais, cena, Player Settings e plug-ins d
 ## Gerar o app
 
 **Android** (precisa do módulo *Android Build Support* com SDK, NDK e OpenJDK instalado no Unity Hub):
-File > Build Profiles > Android > Switch Platform > Build. O projeto já está configurado:
+menu **CircuitAIR > 3. Gerar APK (Android)**. Na primeira vez ele troca a plataforma para Android (a Unity
+reimporta os recursos); use o menu de novo para gerar `CircuitAir/Builds/Android/CircuitAIR.apk`. Pela linha de
+comando, com o Editor fechado: `unity build CircuitAir --target Android --execute-method CircuitAIR.EditorTools.CircuitBuild.BuildAndroidBatch`.
+Para instalar no celular, ative a depuração USB e rode `adb install -r CircuitAIR.apk`, ou copie o arquivo para o
+celular e abra (permitindo "instalar apps desconhecidos"). O projeto já está configurado:
 `com.equipe4.circuitair`, IL2CPP + ARM64, OpenGL ES 3, Android 7.1+ (API 25), ARCore obrigatório, retrato.
 O celular precisa estar na [lista de aparelhos compatíveis com ARCore](https://developers.google.com/ar/devices).
 
