@@ -105,10 +105,15 @@ celular e abra (permitindo "instalar apps desconhecidos"). O projeto já está c
 `com.equipe4.circuitair`, IL2CPP + ARM64, OpenGL ES 3, Android 7.1+ (API 25), ARCore obrigatório, retrato.
 O celular precisa estar na [lista de aparelhos compatíveis com ARCore](https://developers.google.com/ar/devices).
 
-**iOS** (precisa de um Mac com Xcode e do módulo *iOS Build Support*): Build Profiles > iOS > Build, abra o
-projeto gerado no Xcode, escolha a equipe de assinatura e rode no iPhone. A descrição de uso da câmera já está
-configurada. O ARKit rastreia imagens em movimento melhor que o ARCore, então o iPhone tende a seguir a lupa
-física com menos atraso.
+**iOS:** não existe APK para iPhone; o app (.ipa) só sai de um Mac com Xcode. No Windows, com o módulo
+*iOS Build Support*, o menu **CircuitAIR > 4. Gerar projeto do Xcode (iOS)** gera
+`CircuitAir/Builds/iOS/CircuitAIR-Xcode` (ou, com o Editor fechado:
+`unity build CircuitAir --target iOS --execute-method CircuitAIR.EditorTools.CircuitBuild.BuildIOSBatch`).
+Leve a pasta para o Mac e siga o `LEIA-ME_iPhone.txt` que vai dentro dela: `chmod +x *.sh usymtool*`, abrir
+`Unity-iPhone.xcodeproj`, escolher o Apple ID em *Signing & Capabilities* e rodar no iPhone pelo cabo (iOS 15+;
+com Apple ID gratuito o app vale 7 dias). Depois de gerar o iOS, volte a plataforma para Android antes de gerar o
+APK (o menu 3 oferece a troca). O ARKit rastreia imagens em movimento melhor que o ARCore, então o iPhone tende a
+seguir a lupa física com menos atraso.
 
 ## Estrutura
 

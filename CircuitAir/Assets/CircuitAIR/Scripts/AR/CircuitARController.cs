@@ -37,6 +37,9 @@ namespace CircuitAIR
         /// </summary>
         public static readonly Quaternion BackToFront = Quaternion.Euler(0f, 0f, 180f);
 
+        /// <summary>Maior imagem de câmera pedida ao AR (1920x1440).</summary>
+        private const long MaxCameraPixels = 1920L * 1440L;
+
         [Header("Circuito")]
         [SerializeField] private CircuitTheme theme;
         [SerializeField] private LupaController lupa;
@@ -257,6 +260,9 @@ namespace CircuitAIR
                         if (fps < 30)
                             continue;
                         long pixels = (long)configuration.width * configuration.height;
+                        // Acima de 1920x1440 (ex.: 4K no iPhone) só gasta bateria: o marcador já é achado.
+                        if (pixels > MaxCameraPixels)
+                            continue;
                         if (pixels > bestPixels)
                         {
                             best = configuration;
