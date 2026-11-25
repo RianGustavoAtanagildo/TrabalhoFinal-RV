@@ -27,3 +27,10 @@ crashlytics-build.properties
 # OS generated files
 .DS_Store
 Thumbs.db
+# Capturas de tela dos testes no Editor
+[Ss]creenshots/
+
+# Arquivos de projeto gerados pela Unity/IDE em cada computador
+*.csproj
+*.sln
+*.slnx

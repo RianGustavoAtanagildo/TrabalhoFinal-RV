@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Circuit AIR · Marcadores para imprimir</title>
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: #111; margin: 0; font-size: 10.5pt; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; }
+  p { margin: 0 0 2mm; line-height: 1.35; }
+  .aviso { border: 0.4mm solid #111; padding: 3mm 4mm; margin: 3mm 0 6mm; }
+  .linha { display: flex; gap: 14mm; align-items: flex-start; }
+  .item { text-align: center; }
+  .corte { display: inline-block; border: 0.25mm dashed #888; padding: 4mm; }
+  .qr { width: 100mm; height: 100mm; display: block; }
+  .lupa { width: 50mm; height: 50mm; display: block; }
+  .rotulo { font-weight: 600; margin-top: 2mm; }
+  .regua { margin-top: 8mm; }
+  .regua-barra { width: 100mm; height: 4mm; border: 0.3mm solid #111; border-top: none;
+                 background: repeating-linear-gradient(90deg, #111 0 0.3mm, transparent 0.3mm 10mm); }
+  ol { margin: 2mm 0 0 5mm; padding: 0; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <h1>Circuit AIR · marcadores para imprimir</h1>
+  <div class="aviso">
+    <b>Imprima em tamanho real (escala 100%, sem "ajustar à página").</b> Depois de imprimir, confira com uma régua:
+    a <b>moldura preta do QR Code mede 6,6 cm</b> (a imagem inteira, com a margem branca, mede 10 cm) e o
+    <b>marcador da lupa mede 5 cm</b> de borda a borda. A régua de 10 cm abaixo também serve para conferir.
+    Recorte pela linha tracejada e use papel fosco: brilho atrapalha a câmera.
+  </div>
+
+  <div class="linha">
+    <div class="item">
+      <div class="corte"><img class="qr" src="../imagens/CircuitQR.jpg" alt="QR Code do circuito"></div>
+      <div class="rotulo">CircuitQR · 10 cm · vai na mesa</div>
+    </div>
+    <div class="item">
+      <div class="corte"><img class="lupa" src="../imagens/LupaMarker.png" alt="Marcador da lupa"></div>
+      <div class="rotulo">LupaMarker · 5 cm · vai na lupa</div>
+      <p style="text-align:left; margin-top:4mm; max-width:62mm">
+        <b>Como prender:</b> cole num cartão rígido e prenda <b>em pé no cabo</b>, como uma bandeirinha,
+        perpendicular ao aro, com a <b>borda do quadrado preto virada para o aro</b>. Se preferir colar deitado
+        no plano do aro, use o botão "Girar 90°" em Ajustar lupa.
+      </p>
+    </div>
+  </div>
+
+  <div class="regua">
+    <div class="regua-barra"></div>
+    <p>Régua de conferência: 10 cm (traços a cada 1 cm).</p>
+  </div>
+
+  <ol>
+    <li>Coloque o QR Code sobre uma mesa bem iluminada, sem reflexo.</li>
+    <li>Coloque o celular num suporte apontado para o QR Code, a 40 a 60 cm.</li>
+    <li>No app, use <b>Ajustar lupa</b> uma vez para alinhar o contorno azul com o aro real.</li>
+  </ol>
+</body>
+</html>

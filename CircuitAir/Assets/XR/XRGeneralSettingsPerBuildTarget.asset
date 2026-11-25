@@ -17,6 +17,20 @@ MonoBehaviour:
   m_AutomaticRunning: 0
   m_Loaders:
   - {fileID: 11400000, guid: d10b878c27991cd458f1e0615a51a8ac, type: 2}
+--- !u!114 &-2876899282927975042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: iPhone Settings
+  m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRGeneralSettings
+  m_Manager: {fileID: 2655860572099995374}
+  m_InitManagerOnStart: 1
 --- !u!114 &-2353807802616230125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50,6 +64,8 @@ MonoBehaviour:
     settings: {fileID: 2552821576382295445}
   - buildTarget: 1
     settings: {fileID: -2353807802616230125}
+  - buildTarget: 4
+    settings: {fileID: -2876899282927975042}
 --- !u!114 &2552821576382295445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,6 +80,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRGeneralSettings
   m_Manager: {fileID: -8284728550632812468}
   m_InitManagerOnStart: 1
+--- !u!114 &2655860572099995374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c3631f5e58749a59194e0cf6baf6d5, type: 3}
+  m_Name: iPhone Providers
+  m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRManagerSettings
+  m_RequiresSettingsUpdate: 0
+  m_AutomaticLoading: 0
+  m_AutomaticRunning: 0
+  m_Loaders:
+  - {fileID: 11400000, guid: 2b83f5bd92da1f04fbb948dff548dc69, type: 2}
 --- !u!114 &8496057101792971645
 MonoBehaviour:
   m_ObjectHideFlags: 0

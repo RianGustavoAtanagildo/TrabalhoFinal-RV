@@ -1,5 +1,9 @@
 # Guia completo para migrar o projeto para Vuforia no Unity
 
+> **Histórico, não segue mais valendo.** O projeto continuou em **AR Foundation**, como pede o planejamento:
+> a lupa física é reconhecida por um marcador preso no cabo (veja o [README](README.md)). O Vuforia exigiria
+> conta e licença, e o pacote `.tgz` dele nunca foi para o repositório (estava no `.gitignore`).
+
 Este guia foi pensado para você que ainda está começando no Unity e quer fazer a migração do projeto de realidade aumentada de AR Foundation para Vuforia de forma organizada.
 
 Objetivo: migrar o projeto para uma única tecnologia, sem misturar AR Foundation e Vuforia no mesmo projeto.
